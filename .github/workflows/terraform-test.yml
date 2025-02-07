@@ -62,7 +62,7 @@ jobs:
           
       - name: Terraform Test
         run: |
-          terraform test -no-color -parallelism=1 -timeout=20m
+          terraform test
         env:
           AWS_ACCESS_KEY_ID: ${{ steps.aws_auth.outputs.aws_access_key_id }}
           AWS_SECRET_ACCESS_KEY: ${{ steps.aws_auth.outputs.aws_secret_access_key }}
