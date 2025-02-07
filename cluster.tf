@@ -34,7 +34,7 @@ resource "aws_rds_cluster" "cluster" {
   engine_mode                           = var.engine_mode
   engine_version                        = var.engine_version
   final_snapshot_identifier             = var.final_snapshot_identifier
-  global_cluster_identifier             = var.global_cluster_identifier
+  global_cluster_identifier             = var.create_global_cluster ? aws_rds_global_cluster.global[0].id : var.global_cluster_identifier
   iam_database_authentication_enabled   = var.iam_database_authentication_enabled
   iam_roles                             = [for role in var.iam_roles : role.role_arn]
   iops                                  = var.iops
