@@ -44,7 +44,10 @@ jobs:
           github_app_pem_file: ${{ secrets.GH_APP_PEM_FILE }}
           github_app_installation_id: ${{ vars.GH_APP_INSTALLATION_ID }}
           github_base_url: "${{ github.server_url }}/"
-          
+
+      - name: Setup Terraform
+        uses: CSVD/gh-actions-setup-terraform@v2
+        
       - name: Terraform Init
         id: terraform_init
         run: terraform init
