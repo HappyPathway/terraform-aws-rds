@@ -10,8 +10,10 @@
 		{
 			"path": "../terraform-provider-aws/website/docs/r",
 			"name": "providers/aws/resources"
+		},
+		{
+			"path": "../terraform/website/docs/language/tests"
 		}
-		
 	],
 	"settings": {}
 }

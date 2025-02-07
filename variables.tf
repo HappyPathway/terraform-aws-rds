@@ -36,8 +36,8 @@ variable "backup_retention_period" {
 
 variable "backup_window" {
   type        = string
-  default     = "10:12-10:42"
-  description = "The daily time range during which automated backups are created"
+  default     = null  # Set to null since preferred_backup_window is the preferred variable
+  description = "DEPRECATED: Use preferred_backup_window instead. The daily time range during which automated backups are created"
 }
 
 variable "ca_cert_identifier" {
@@ -240,8 +240,9 @@ variable "parameter_group_name_source" {
 
 variable "password" {
   type        = string
-  default     = null
-  description = "The password for the master user"
+  default     = null  # Set to null since master_password is the preferred variable
+  description = "DEPRECATED: Use master_password instead. The password for the master user"
+  sensitive   = true
 }
 
 variable "performance_insights_enabled" {
@@ -258,8 +259,12 @@ variable "performance_insights_kms_key_id" {
 
 variable "performance_insights_retention_period" {
   type        = number
-  default     = 0
-  description = "The retention period for Performance Insights"
+  default     = 7
+  description = "The retention period for Performance Insights in days. Valid values are 7 or 731 (2 years)"
+  validation {
+    condition     = contains([0, 7, 731], var.performance_insights_retention_period)
+    error_message = "Performance insights retention period must be either 7 or 731 days when performance insights is enabled, or 0 when disabled."
+  }
 }
 
 variable "port" {
@@ -338,8 +343,8 @@ variable "tags_all" {
 
 variable "username" {
   type        = string
-  default     = "dbadmin"
-  description = "The username for the master user"
+  default     = null  # Set to null since master_username is the preferred variable
+  description = "DEPRECATED: Use master_username instead. The username for the master user"
 }
 
 variable "vpc_security_group_ids" {
@@ -379,9 +384,12 @@ variable "global_cluster_identifier" {
 }
 
 variable "iam_roles" {
-  type        = list(string)
-  default     = []
-  description = "List of IAM roles to associate with the cluster"
+  type = map(object({
+    feature_name = string
+    role_arn    = string
+  }))
+  default     = {}
+  description = "Map of IAM role associations for the RDS cluster. Key is arbitrary identifier, feature_name is the RDS feature (e.g., s3Import, s3Export), and role_arn is the IAM role ARN"
 }
 
 variable "source_region" {
@@ -480,55 +488,7 @@ variable "scaling_configuration" {
     timeout_action          = optional(string, "RollbackCapacityChange")
   })
   default = null
-  description = "Map containing serverless scaling properties for serverless v1"
-}
-
-variable "enable_serverlessv2_scaling" {
-  type        = bool
-  default     = false
-  description = "Whether to enable Serverless v2 scaling configuration"
-}
-
-variable "serverlessv2_max_capacity" {
-  type        = number
-  default     = 16
-  description = "Maximum capacity for an Aurora DB cluster in provisioned DB engine mode with Serverless v2. Valid capacity values are in a range of 0.5 up to 256"
-}
-
-variable "serverlessv2_min_capacity" {
-  type        = number
-  default     = 0.5
-  description = "Minimum capacity for an Aurora DB cluster in provisioned DB engine mode with Serverless v2. Valid capacity values are in a range of 0.5 up to 256"
-}
-
-variable "scaling_auto_pause" {
-  type        = bool
-  default     = true
-  description = "Whether to enable automatic pause for Serverless v1. A DB cluster can be paused only when it's idle (it has no connections)"
-}
-
-variable "scaling_max_capacity" {
-  type        = number
-  default     = 16
-  description = "Maximum capacity for an Aurora DB cluster in serverless DB engine mode"
-}
-
-variable "scaling_min_capacity" {
-  type        = number
-  default     = 1
-  description = "Minimum capacity for an Aurora DB cluster in serverless DB engine mode"
-}
-
-variable "scaling_seconds_until_auto_pause" {
-  type        = number
-  default     = 300
-  description = "Time, in seconds, before an Aurora DB cluster in serverless mode is paused. Valid values are 300 through 86400"
-}
-
-variable "scaling_timeout_action" {
-  type        = string
-  default     = "RollbackCapacityChange"
-  description = "Action to take when the timeout is reached. Valid values: ForceApplyCapacityChange, RollbackCapacityChange"
+  description = "Map containing serverless v1 scaling properties for serverless v1"
 }
 
 // New variables for conditional resource creation
@@ -700,15 +660,6 @@ variable "activity_stream_engine_native_audit_fields_included" {
   description = "Whether to include engine native audit fields in the activity stream"
 }
 
-variable "iam_roles" {
-  type = map(object({
-    feature_name = string
-    role_arn    = string
-  }))
-  default     = {}
-  description = "Map of IAM role associations for the RDS cluster. Key is arbitrary identifier, feature_name is the RDS feature (e.g., s3Import, s3Export), and role_arn is the IAM role ARN"
-}
-
 variable "enable_automated_backups_replication" {
   type        = bool
   default     = false
@@ -719,4 +670,29 @@ variable "automated_backups_replication_kms_key_id" {
   type        = string
   default     = null
   description = "The KMS key ID to use for encrypted automated backups in the replica region"
+}
+
+variable "master_username" {
+  type        = string
+  default     = "dbadmin"
+  description = "The username for the master user"
+}
+
+variable "master_password" {
+  type        = string
+  default     = null
+  description = "The password for the master user"
+  sensitive   = true
+}
+
+variable "preferred_backup_window" {
+  type        = string
+  default     = "10:12-10:42"
+  description = "The daily time range during which automated backups are created"
+}
+
+variable "create_global_cluster" {
+  type        = bool
+  default     = false
+  description = "Whether to create a global RDS cluster"
 }

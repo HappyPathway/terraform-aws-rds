@@ -36,13 +36,13 @@ resource "aws_rds_cluster" "cluster" {
   final_snapshot_identifier             = var.final_snapshot_identifier
   global_cluster_identifier             = var.global_cluster_identifier
   iam_database_authentication_enabled   = var.iam_database_authentication_enabled
-  iam_roles                             = var.iam_roles
+  iam_roles                             = [for role in var.iam_roles : role.role_arn]
   iops                                  = var.iops
   kms_key_id                            = var.kms_key_id
   manage_master_user_password           = var.manage_master_user_password
-  master_password                       = var.password # sensitive
+  master_password                       = var.master_password
   master_user_secret_kms_key_id         = var.master_user_secret_kms_key_id
-  master_username                       = var.username
+  master_username                       = var.master_username
   monitoring_interval                   = var.monitoring_interval
   monitoring_role_arn                   = var.monitoring_role_arn
   network_type                          = var.network_type
@@ -50,7 +50,7 @@ resource "aws_rds_cluster" "cluster" {
   performance_insights_kms_key_id       = var.performance_insights_kms_key_id
   performance_insights_retention_period = var.performance_insights_retention_period
   port                                  = var.port
-  preferred_backup_window               = var.backup_window
+  preferred_backup_window               = var.preferred_backup_window
   preferred_maintenance_window          = var.maintenance_window
   replication_source_identifier         = var.replicate_source_db
   skip_final_snapshot                   = var.skip_final_snapshot
@@ -63,21 +63,21 @@ resource "aws_rds_cluster" "cluster" {
   vpc_security_group_ids                = var.vpc_security_group_ids
 
   dynamic "serverlessv2_scaling_configuration" {
-    for_each = var.engine_mode == "provisioned" && var.enable_serverlessv2_scaling ? [1] : []
+    for_each = var.engine_mode == "provisioned" && var.enable_serverlessv2_scaling && var.serverlessv2_scaling_configuration != null ? [var.serverlessv2_scaling_configuration] : []
     content {
-      max_capacity = var.serverlessv2_max_capacity
-      min_capacity = var.serverlessv2_min_capacity
+      max_capacity = serverlessv2_scaling_configuration.value.max_capacity
+      min_capacity = serverlessv2_scaling_configuration.value.min_capacity
     }
   }
 
   dynamic "scaling_configuration" {
-    for_each = var.engine_mode == "serverless" ? [1] : []
+    for_each = var.engine_mode == "serverless" && var.scaling_configuration != null ? [var.scaling_configuration] : []
     content {
-      auto_pause               = var.scaling_auto_pause
-      max_capacity            = var.scaling_max_capacity
-      min_capacity            = var.scaling_min_capacity
-      seconds_until_auto_pause = var.scaling_seconds_until_auto_pause
-      timeout_action          = var.scaling_timeout_action
+      auto_pause               = scaling_configuration.value.auto_pause
+      max_capacity            = scaling_configuration.value.max_capacity
+      min_capacity            = scaling_configuration.value.min_capacity
+      seconds_until_auto_pause = scaling_configuration.value.seconds_until_auto_pause
+      timeout_action          = scaling_configuration.value.timeout_action
     }
   }
 
@@ -113,8 +113,8 @@ resource "aws_rds_cluster" "cluster" {
       replication_source_identifier
     ]
 
-    # Prevent accidental cluster deletion if enabled
-    prevent_destroy = var.deletion_protection
+    # Allow terraform destroy to work, deletion protection is handled by RDS
+    prevent_destroy = false
   }
 
   timeouts {

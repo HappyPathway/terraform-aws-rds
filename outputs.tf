@@ -107,9 +107,9 @@ output "activity_stream_status" {
   value       = try(aws_rds_cluster_activity_stream.this[0].kinesis_stream_name, null)
 }
 
-output "automated_backups_replication_status" {
-  description = "Status of the automated backups replication"
-  value       = try(aws_db_instance_automated_backups_replication.this[0].status, null)
+output "automated_backups_replication" {
+  description = "The automated backups replication configuration"
+  value       = try(aws_db_instance_automated_backups_replication.this[0], null)
 }
 
 output "role_associations" {
