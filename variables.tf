@@ -16,28 +16,22 @@ variable "apply_immediately" {
   description = "Whether to apply changes immediately"
 }
 
-variable "auto_minor_version_upgrade" {
-  type        = bool
-  default     = false
-  description = "Whether minor version upgrades are applied automatically"
-}
-
 variable "availability_zone" {
   type        = string
   default     = "us-gov-west-1a"
   description = "The availability zone of the DB instance"
 }
 
+variable "availability_zones" {
+  type        = list(string)
+  default     = ["us-gov-west-1a", "us-gov-west-1b", "us-gov-west-1c"]
+  description = "A list of Availability Zones (AZs) where instances in the DB cluster can be created."
+}
+
 variable "backup_retention_period" {
   type        = number
   default     = 35
   description = "The number of days to retain backups"
-}
-
-variable "backup_target" {
-  type        = string
-  default     = "region"
-  description = "The target for backups (e.g., region)"
 }
 
 variable "backup_window" {
@@ -52,10 +46,16 @@ variable "ca_cert_identifier" {
   description = "The identifier of the CA certificate for the DB instance"
 }
 
-variable "character_set_name" {
+variable "cluster_identifier" {
   type        = string
-  default     = null
-  description = "The character set name for the DB instance"
+  default     = "rds-csvd-morph-dev"
+  description = "The identifier for the RDS cluster."
+}
+
+variable "cluster_members" {
+  type        = list(string)
+  default     = ["rds-csvd-morph-dev-1", "rds-csvd-morph-dev-2"]
+  description = "A list of RDS instances that are part of the cluster."
 }
 
 variable "copy_tags_to_snapshot" {
@@ -70,10 +70,10 @@ variable "custom_iam_instance_profile" {
   description = "The custom IAM instance profile for the DB instance"
 }
 
-variable "customer_owned_ip_enabled" {
-  type        = bool
-  default     = false
-  description = "Whether customer-owned IP is enabled"
+variable "db_cluster_parameter_group_name" {
+  type        = string
+  default     = "census-baseline-aurora-cl-8"
+  description = "The name of the DB cluster parameter group to associate with this instance."
 }
 
 variable "db_name" {
@@ -88,10 +88,10 @@ variable "db_subnet_group_name" {
   description = "The DB subnet group name"
 }
 
-variable "dedicated_log_volume" {
-  type        = bool
-  default     = false
-  description = "Whether to use a dedicated log volume"
+variable "db_subnet_group_name_source" {
+  type        = string
+  description = "The name of the DB subnet group to use as a data source"
+  default     = "rdsng-vpc2"
 }
 
 variable "delete_automated_backups" {
@@ -112,40 +112,22 @@ variable "domain" {
   description = "The Active Directory domain to join"
 }
 
-variable "domain_auth_secret_arn" {
-  type        = string
-  default     = null
-  description = "The ARN of the secret containing the domain credentials"
-}
-
-variable "domain_dns_ips" {
-  type        = list(string)
-  default     = []
-  description = "The DNS IP addresses of the domain"
-}
-
-variable "domain_fqdn" {
-  type        = string
-  default     = null
-  description = "The fully qualified domain name of the domain"
-}
-
 variable "domain_iam_role_name" {
   type        = string
   default     = null
   description = "The IAM role name for the domain"
 }
 
-variable "domain_ou" {
-  type        = string
-  default     = null
-  description = "The organizational unit for the domain"
-}
-
 variable "enabled_cloudwatch_logs_exports" {
   type        = list(string)
   default     = ["audit", "error", "general", "slowquery"]
   description = "The list of log types to export to CloudWatch"
+}
+
+variable "enable_http_endpoint" {
+  description = "Enable HTTP endpoint for the RDS cluster"
+  type        = bool
+  default     = false
 }
 
 variable "engine" {
@@ -158,6 +140,12 @@ variable "engine_lifecycle_support" {
   type        = string
   default     = "open-source-rds-extended-support"
   description = "The lifecycle support for the engine"
+}
+
+variable "engine_mode" {
+  type        = string
+  default     = "provisioned"
+  description = "The database engine mode."
 }
 
 variable "engine_version" {
@@ -208,12 +196,6 @@ variable "kms_key_id" {
   description = "The KMS key ID for encryption"
 }
 
-variable "license_model" {
-  type        = string
-  default     = "general-public-license"
-  description = "The license model for the DB instance"
-}
-
 variable "maintenance_window" {
   type        = string
   default     = "wed:13:21-wed:13:51"
@@ -232,12 +214,6 @@ variable "master_user_secret_kms_key_id" {
   description = "The KMS key ID for the master user secret"
 }
 
-variable "max_allocated_storage" {
-  type        = number
-  default     = 0
-  description = "The maximum allocated storage for the DB instance"
-}
-
 variable "monitoring_interval" {
   type        = number
   default     = 0
@@ -250,34 +226,16 @@ variable "monitoring_role_arn" {
   description = "The ARN of the monitoring role"
 }
 
-variable "multi_az" {
-  type        = bool
-  default     = false
-  description = "Whether the DB instance is multi-AZ"
-}
-
-variable "nchar_character_set_name" {
-  type        = string
-  default     = null
-  description = "The NCHAR character set name"
-}
-
-variable "network_type" {
-  type        = string
-  default     = "IPV4"
-  description = "The network type (e.g., IPV4)"
-}
-
-variable "option_group_name" {
-  type        = string
-  default     = "default:aurora-mysql-8-0"
-  description = "The option group name"
-}
-
 variable "parameter_group_name" {
   type        = string
   default     = "census-baseline-aurora-8"
   description = "The parameter group name"
+}
+
+variable "parameter_group_name_source" {
+  type        = string
+  description = "The name of the DB parameter group to use as a data source"
+  default     = "census-baseline-aurora-8"
 }
 
 variable "password" {
@@ -310,16 +268,10 @@ variable "port" {
   description = "The port for the DB instance"
 }
 
-variable "publicly_accessible" {
-  type        = bool
-  default     = false
-  description = "Whether the DB instance is publicly accessible"
-}
-
-variable "replica_mode" {
-  type        = string
-  default     = null
-  description = "The replica mode for the DB instance"
+variable "promotion_tier" {
+  type        = number
+  default     = 0
+  description = "The promotion tier for the DB instance"
 }
 
 variable "replicate_source_db" {
@@ -344,12 +296,6 @@ variable "storage_encrypted" {
   type        = bool
   default     = true
   description = "Whether storage is encrypted"
-}
-
-variable "storage_throughput" {
-  type        = number
-  default     = 0
-  description = "The storage throughput for the DB instance"
 }
 
 variable "storage_type" {
@@ -379,7 +325,7 @@ variable "tags_all" {
   default = {
     Comments                = "rds-csvd-morph-dev"
     CostAllocation          = "CSVD"
-    Name                    = "rds-csvd-morph-dev-1"
+    Name                    = "rds-csvd-morph-dev"
     "Project Name"          = "CSVD_PaaS"
     "Project Role"          = "CSVD_PaaS_RDS"
     ProjectNumber           = "FS0000000000"
@@ -388,18 +334,6 @@ variable "tags_all" {
     "boc:tf_module_version" = "1.0"
   }
   description = "Optional tags for the DB instance"
-}
-
-variable "timezone" {
-  type        = string
-  default     = null
-  description = "The timezone for the DB instance"
-}
-
-variable "upgrade_storage_config" {
-  type        = string
-  default     = null
-  description = "The upgrade storage configuration"
 }
 
 variable "username" {
@@ -412,4 +346,377 @@ variable "vpc_security_group_ids" {
   type        = list(string)
   default     = ["sg-01980edbedc2a9201"]
   description = "The VPC security group IDs"
+}
+
+variable "backtrack_window" {
+  type        = number
+  default     = null
+  description = "The target backtrack window in seconds"
+}
+
+variable "db_system_id" {
+  type        = string
+  default     = null
+  description = "The identifier of the DB system"
+}
+
+variable "enable_global_write_forwarding" {
+  type        = bool
+  default     = false
+  description = "Whether to enable global write forwarding"
+}
+
+variable "enable_local_write_forwarding" {
+  type        = bool
+  default     = false
+  description = "Whether to enable local write forwarding"
+}
+
+variable "global_cluster_identifier" {
+  type        = string
+  default     = null
+  description = "The global cluster identifier"
+}
+
+variable "iam_roles" {
+  type        = list(string)
+  default     = []
+  description = "List of IAM roles to associate with the cluster"
+}
+
+variable "source_region" {
+  type        = string
+  default     = null
+  description = "The source region for cross-region replication"
+}
+
+variable "force_destroy" {
+  type        = bool
+  default     = false
+  description = "When deleting a cluster, snapshot will also be deleted if true"
+}
+
+variable "auto_minor_version_upgrade" {
+  type        = bool
+  default     = true
+  description = "Indicates that minor engine upgrades will be applied automatically to the DB instance during the maintenance window"
+}
+
+variable "publicly_accessible" {
+  type        = bool
+  default     = false
+  description = "Controls if instance is publicly accessible"
+}
+
+variable "network_type" {
+  type        = string
+  default     = null
+  description = "The network type of the cluster"
+}
+
+variable "dbi_resource_id" {
+  type        = string
+  default     = null
+  description = "Region-unique, immutable identifier for the DB instance"
+}
+
+variable "engine_version_actual" {
+  type        = string
+  default     = null
+  description = "Database engine version actually running on the instance"
+}
+
+variable "vpc_id" {
+  type        = string
+  default     = null
+  description = "VPC ID where the RDS cluster will be created"
+}
+
+variable "parameter_group_family" {
+  type        = string
+  default     = "aurora-mysql8.0"
+  description = "Family of the parameter group"
+}
+
+variable "create_db_subnet_group" {
+  type        = bool
+  default     = false
+  description = "Whether to create a database subnet group"
+}
+
+variable "subnet_ids" {
+  type        = list(string)
+  default     = []
+  description = "List of subnet IDs used by database subnet group"
+}
+
+variable "create_monitoring_role" {
+  type        = bool
+  default     = true
+  description = "Whether to create an IAM role for RDS enhanced monitoring"
+}
+
+variable "enable_serverlessv2_scaling" {
+  type        = bool
+  default     = false
+  description = "Whether to enable Serverless v2 scaling configuration"
+}
+
+variable "serverlessv2_scaling_configuration" {
+  type = object({
+    max_capacity = number
+    min_capacity = number
+  })
+  default = null
+  description = "Map containing serverless v2 scaling properties. Valid capacity values are in a range of 0.5 up to 256 in steps of 0.5"
+}
+
+variable "scaling_configuration" {
+  type = object({
+    auto_pause               = optional(bool, true)
+    max_capacity            = optional(number, 256)
+    min_capacity            = optional(number, 2)
+    seconds_until_auto_pause = optional(number, 300)
+    timeout_action          = optional(string, "RollbackCapacityChange")
+  })
+  default = null
+  description = "Map containing serverless scaling properties for serverless v1"
+}
+
+variable "enable_serverlessv2_scaling" {
+  type        = bool
+  default     = false
+  description = "Whether to enable Serverless v2 scaling configuration"
+}
+
+variable "serverlessv2_max_capacity" {
+  type        = number
+  default     = 16
+  description = "Maximum capacity for an Aurora DB cluster in provisioned DB engine mode with Serverless v2. Valid capacity values are in a range of 0.5 up to 256"
+}
+
+variable "serverlessv2_min_capacity" {
+  type        = number
+  default     = 0.5
+  description = "Minimum capacity for an Aurora DB cluster in provisioned DB engine mode with Serverless v2. Valid capacity values are in a range of 0.5 up to 256"
+}
+
+variable "scaling_auto_pause" {
+  type        = bool
+  default     = true
+  description = "Whether to enable automatic pause for Serverless v1. A DB cluster can be paused only when it's idle (it has no connections)"
+}
+
+variable "scaling_max_capacity" {
+  type        = number
+  default     = 16
+  description = "Maximum capacity for an Aurora DB cluster in serverless DB engine mode"
+}
+
+variable "scaling_min_capacity" {
+  type        = number
+  default     = 1
+  description = "Minimum capacity for an Aurora DB cluster in serverless DB engine mode"
+}
+
+variable "scaling_seconds_until_auto_pause" {
+  type        = number
+  default     = 300
+  description = "Time, in seconds, before an Aurora DB cluster in serverless mode is paused. Valid values are 300 through 86400"
+}
+
+variable "scaling_timeout_action" {
+  type        = string
+  default     = "RollbackCapacityChange"
+  description = "Action to take when the timeout is reached. Valid values: ForceApplyCapacityChange, RollbackCapacityChange"
+}
+
+// New variables for conditional resource creation
+variable "create_cluster" {
+  type        = bool
+  default     = true
+  description = "Whether to create this RDS cluster"
+}
+
+variable "create_cluster_instance" {
+  type        = bool
+  default     = true
+  description = "Whether to create cluster instances"
+}
+
+variable "number_of_instances" {
+  type        = number
+  default     = 1
+  description = "Number of cluster instances to create"
+}
+
+# S3 Import Variables
+variable "enable_s3_import" {
+  type        = bool
+  default     = false
+  description = "Whether to enable S3 import functionality"
+}
+
+variable "s3_import_bucket_name" {
+  type        = string
+  default     = null
+  description = "The bucket name where your backup is stored"
+}
+
+variable "s3_import_bucket_prefix" {
+  type        = string
+  default     = null
+  description = "The prefix (path) inside the S3 bucket where your backup is stored"
+}
+
+variable "s3_import_ingestion_role" {
+  type        = string
+  default     = null
+  description = "The ARN of the role to use for S3 data ingestion"
+}
+
+variable "s3_import_source_engine" {
+  type        = string
+  default     = null
+  description = "Source engine for the backup"
+}
+
+variable "s3_import_source_engine_version" {
+  type        = string
+  default     = null
+  description = "Version of the source engine used to make the backup"
+}
+
+# Restore to Point in Time Variables
+variable "enable_restore_to_point_in_time" {
+  type        = bool
+  default     = false
+  description = "Whether to enable restore to point in time"
+}
+
+variable "restore_source_cluster_identifier" {
+  type        = string
+  default     = null
+  description = "The identifier of the source DB cluster from which to restore"
+}
+
+variable "restore_source_cluster_resource_id" {
+  type        = string
+  default     = null
+  description = "The resource ID of the source DB cluster from which to restore"
+}
+
+variable "restore_type" {
+  type        = string
+  default     = "full-copy"
+  description = "The type of restore to be performed. Valid options are 'full-copy' and 'copy-on-write'"
+}
+
+variable "restore_use_latest_restorable_time" {
+  type        = bool
+  default     = false
+  description = "Whether to restore the DB cluster to the latest restorable backup time"
+}
+
+variable "restore_to_time" {
+  type        = string
+  default     = null
+  description = "The date and time to restore the DB cluster to"
+}
+
+variable "allowed_security_groups" {
+  type        = list(string)
+  default     = []
+  description = "List of security group IDs that are allowed to access the cluster"
+}
+
+variable "create_cluster_endpoints" {
+  type        = bool
+  default     = false
+  description = "Whether to create custom cluster endpoints"
+}
+
+variable "cluster_endpoints" {
+  type = map(object({
+    type             = string
+    static_members   = optional(list(string))
+    excluded_members = optional(list(string))
+  }))
+  default     = {}
+  description = "Map of cluster endpoint configurations. The key is the endpoint identifier and value is a map of endpoint configuration. Type must be READER, WRITER, ANY or CUSTOM"
+}
+
+variable "enable_cluster_snapshot_copy" {
+  type        = bool
+  default     = false
+  description = "Whether to enable snapshot copying to another region"
+}
+
+variable "source_snapshot_identifier" {
+  type        = string
+  default     = null
+  description = "The identifier of the source snapshot to copy"
+}
+
+variable "snapshot_copy_kms_key_id" {
+  type        = string
+  default     = null
+  description = "The KMS key ID to use for snapshot encryption in the destination region"
+}
+
+variable "snapshot_copy_destination_region" {
+  type        = string
+  default     = null
+  description = "The region to copy snapshots to"
+}
+
+variable "snapshot_copy_presigned_url" {
+  type        = string
+  default     = null
+  description = "The presigned URL to use for snapshot copying"
+}
+
+variable "enable_activity_stream" {
+  type        = bool
+  default     = false
+  description = "Whether to enable database activity stream"
+}
+
+variable "activity_stream_mode" {
+  type        = string
+  default     = "async"
+  description = "Database activity stream mode. Can be sync or async"
+}
+
+variable "activity_stream_kms_key_id" {
+  type        = string
+  default     = null
+  description = "The KMS key ID used for encrypting database activity stream"
+}
+
+variable "activity_stream_engine_native_audit_fields_included" {
+  type        = bool
+  default     = false
+  description = "Whether to include engine native audit fields in the activity stream"
+}
+
+variable "iam_roles" {
+  type = map(object({
+    feature_name = string
+    role_arn    = string
+  }))
+  default     = {}
+  description = "Map of IAM role associations for the RDS cluster. Key is arbitrary identifier, feature_name is the RDS feature (e.g., s3Import, s3Export), and role_arn is the IAM role ARN"
+}
+
+variable "enable_automated_backups_replication" {
+  type        = bool
+  default     = false
+  description = "Whether to enable automated backups replication to another region"
+}
+
+variable "automated_backups_replication_kms_key_id" {
+  type        = string
+  default     = null
+  description = "The KMS key ID to use for encrypted automated backups in the replica region"
 }
