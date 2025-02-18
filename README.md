@@ -939,3 +939,13 @@ resource "aws_cloudwatch_metric_alarm" "failover_event" {
 ## License
 
 This module is licensed under the MIT License - see the LICENSE file for details.
+
+
+[![Terraform Validation](https://github.com/HappyPathway/terraform-aws-rds/actions/workflows/terraform.yaml/badge.svg)](https://github.com/HappyPathway/terraform-aws-rds/actions/workflows/terraform.yaml)
+
+
+[![Terraform Doc](https://github.com/HappyPathway/terraform-aws-rds/actions/workflows/terraform-doc.yaml/badge.svg)](https://github.com/HappyPathway/terraform-aws-rds/actions/workflows/terraform-doc.yaml)
+
+<!-- BEGIN_TF_DOCS -->
+{{ .Content }}
+<!-- END_TF_DOCS -->
